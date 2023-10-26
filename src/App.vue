@@ -1,30 +1,40 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
-  <input type="text" v-model="message">
-  {{message}}
   <div>
-    {{ex}}
+    При запуске страницы запускается worker, который меняет значени counterValue и не блокирует основной поток.
+    <br>
+    После этого нужно сбросить значение counterValue и запустить метод handleClick нажав на BlockMainThread.
+    <br>
+    В момент выполнения метода handleClick взаимодействие со страницей(ввод в инпут) будет недоступно.
   </div>
-<!--  <button @click="handleClick">Click</button>-->
+  <input type="text" v-model="inputValue" />
+    <b>input value:</b> {{ inputValue }}
+  <div>
+    <b>counter value:</b> {{ counterValue }}
+  </div>
+  <!--  Кнопка ниже для запуска метода, при котором основной поток блокируется-->
+  <button @click="handleBlockThread">BlockMainThread</button>
+  <!--  Кнопка ниже для сброса значения после выполнения worker-a-->
+  <button @click="counterValue = 0">ResetCounterValue</button>
 </template>
 
 <script setup lang="ts">
-import Worker from 'worker-loader!./worker'
+import Worker from "worker-loader!./worker";
 import { ref } from "vue";
 
-const message = ref();
-const ex = ref(0);
+const inputValue = ref("");
+const counterValue = ref(0);
 const worker = new Worker();
 
 // При выполнении метода ниже, интерфейс пользователя будет заблокирован до его окончания
-// const handleClick = () => {
-//   for (ex; ex.value <= 50000; ex.value++) {
-//     console.log(ex.value);
-//   }
-// };
+const handleBlockThread = () => {
+  for (counterValue; counterValue.value <= 50000; counterValue.value++) {
+    console.log(counterValue.value);
+  }
+};
 
 worker.onmessage = (e: any) => {
-  ex.value = e.data;
+  counterValue.value = e.data;
 };
 </script>
 
